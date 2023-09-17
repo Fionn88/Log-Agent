@@ -1,9 +1,8 @@
 package main
 
 import (
-	"fmt"
-
 	"kafka"
+	"tailfile"
 
 	"github.com/go-ini/ini"
 	"github.com/sirupsen/logrus"
@@ -29,17 +28,22 @@ func main() {
 	var configObj = new(Config)
 	err := ini.MapTo(configObj, "config.ini")
 	if err != nil {
-		logrus.Error("load config.ini failed,err:%v", err)
+		logrus.Error("load config.ini failed,err: ", err)
 		return
 	}
-	fmt.Println(configObj)
 
 	err = kafka.Init([]string{configObj.KafkaConfig.Address})
 	if err != nil {
-		logrus.Error("init kafka failed,err:%v", err)
+		logrus.Error("init kafka failed,err: ", err)
 		return
 	}
-	logrus.Debug("init kafka success")
+	logrus.Info("init kafka success")
+
+	err = tailfile.Init(configObj.CollectConfig.LogFilePath)
+	if err != nil {
+		logrus.Error("init tailfile failed,err: ", err)
+	}
+	logrus.Info("init tailfile success")
 
 	// cfg, err := ini.Load("config.ini")
 	// if err != nil {
