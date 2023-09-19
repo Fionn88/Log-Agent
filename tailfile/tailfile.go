@@ -25,5 +25,20 @@ func Init(filename string) (err error) {
 		return
 	}
 	fmt.Println(TailObj)
+	if err != nil {
+		logrus.Error("run failed,err: ", err)
+		return
+	}
+
+	// for {
+	// 	msg, ok := <-TailObj.Lines
+	// 	if !ok {
+	// 		logrus.Warn("tail file reclose reopen, filename:%s\n", TailObj.Filename)
+	// 		time.Sleep(time.Second)
+	// 		continue
+	// 	}
+	// 	fmt.Println("Debug Message")
+	// 	fmt.Println("msg: ", msg.Text)
+	// }
 	return
 }
