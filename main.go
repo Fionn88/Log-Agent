@@ -6,6 +6,7 @@ import (
 	"tailfile"
 	"time"
 
+	"github.com/Shopify/sarama"
 	"github.com/go-ini/ini"
 	"github.com/sirupsen/logrus"
 )
@@ -16,8 +17,9 @@ type Config struct {
 }
 
 type KafkaConfig struct {
-	Address string `ini:"address"`
-	Topic   string `ini:"topic"`
+	Address  string `ini:"address"`
+	Topic    string `ini:"topic"`
+	ChanSize int64  `ini:"chan_size`
 }
 
 type CollectConfig struct {
@@ -27,14 +29,18 @@ type CollectConfig struct {
 func run() (err error) {
 
 	for {
-		msg, ok := <-tailfile.TailObj.Lines
+		line, ok := <-tailfile.TailObj.Lines
 		if !ok {
 			logrus.Warn("tail file reclose reopen, filename:%s\n", tailfile.TailObj.Filename)
 			time.Sleep(time.Second)
 			continue
 		}
-		fmt.Println("Debug Message")
-		fmt.Println("msg: ", msg.Text)
+		fmt.Println(line.Text)
+		msg := &sarama.ProducerMessage{}
+		msg.Topic = "some_log"
+		msg.Value = sarama.StringEncoder(line.Text)
+
+		kafka.MsgChan <- msg
 	}
 
 }
@@ -57,7 +63,7 @@ func main() {
 	// fmt.Println(kafkaAddress)
 
 	// Init Kafka
-	err = kafka.Init([]string{configObj.KafkaConfig.Address})
+	err = kafka.Init([]string{configObj.KafkaConfig.Address}, configObj.KafkaConfig.ChanSize)
 	if err != nil {
 		logrus.Error("init kafka failed,err: ", err)
 		return

@@ -4,7 +4,7 @@
 
 
 ## 已解決的 issue
-- 以為是傳送 Struct 發生錯誤，是 Variable shadowing 的問題。
+- [Ref](https://stackoverflow.com/questions/76143322/golang-shadowing-variable)以為是傳送 Struct 發生錯誤，是 Variable shadowing 的問題。
 ```
 panic: runtime error: invalid memory address or nil pointer dereference
 [signal SIGSEGV: segmentation violation code=0x1 addr=0x10 pc=0x12532f6]
