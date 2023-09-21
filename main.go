@@ -37,7 +37,7 @@ func run() (err error) {
 		}
 		fmt.Println(line.Text)
 		msg := &sarama.ProducerMessage{}
-		msg.Topic = "some_log"
+		msg.Topic = "web_log"
 		msg.Value = sarama.StringEncoder(line.Text)
 
 		kafka.MsgChan <- msg
