@@ -5,12 +5,11 @@
 - 無法送訊息到Kafka，創立Topic 可以
 1. kafka 和 zookeeper 是用 Docker Run 架設起來，以下為 docker run command
 ```
-docker run -d --name kafka --link zookeeper -p 7203:7203 -p 9092:9092 -e KAFKA_ADVERTISED_HOST_NAME=zookeeper -e ZOOKEEPER_IP=zookeeper ches/kafka
+docker network create app-tier --driver bridge
 
-docker run -d \
---name zookeeper \
--p 2181:2181 \
-jplock/zookeeper
+docker run -d --name zookeeper --network app-tier -p 2181:2181 jplock/zookeeper
+
+docker run -d --name kafka --link zookeeper --network app-tier -p 7203:7203 -p 9092:9092 -e KAFKA_ADVERTISED_HOST_NAME=zookeeper -e ZOOKEEPER_IP=zookeeper ches/kafka
 ```
 
 2. go run main.go 接著 input 內容到 my.log 
