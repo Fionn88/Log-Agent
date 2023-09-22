@@ -26,7 +26,8 @@ type CollectConfig struct {
 	LogFilePath string `ini:"logfile_path"`
 }
 
-func run() (err error) {
+func run(configObj *Config) (err error) {
+	// logfile => TailObj => log => client => kafka
 
 	for {
 		line, ok := <-tailfile.TailObj.Lines
@@ -37,7 +38,7 @@ func run() (err error) {
 		}
 		fmt.Println(line.Text)
 		msg := &sarama.ProducerMessage{}
-		msg.Topic = "web_log"
+		msg.Topic = configObj.Topic
 		msg.Value = sarama.StringEncoder(line.Text)
 
 		kafka.MsgChan <- msg
@@ -77,7 +78,7 @@ func main() {
 	}
 	logrus.Info("init tailfile success")
 
-	err = run()
+	err = run(configObj)
 	if err != nil {
 		logrus.Error("run failed,err: ", err)
 		return

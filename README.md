@@ -22,3 +22,5 @@ exit status 2
 ## 補充知識
 
 - [Ref](https://ithelp.ithome.com.tw/m/articles/10187265) 變數的可視範圍，字母大寫會被exported，小寫則反之
+- Run Kafka Consumer
+  - `docker run --rm --network <KAFKA_SAME_NETWORK> bitnami/kafka kafka-console-consumer.sh --topic web_log --from-beginning --bootstrap-server <YOUR_KAFKA_NAME>:9092`
