@@ -7,7 +7,7 @@ import (
 
 var (
 	client  sarama.SyncProducer
-	MsgChan chan *sarama.ProducerMessage
+	msgChan chan *sarama.ProducerMessage
 )
 
 func Init(address []string, chansize int64) (err error) {
@@ -21,7 +21,7 @@ func Init(address []string, chansize int64) (err error) {
 		logrus.Error("kafka: producer close, err:", err)
 		return
 	}
-	MsgChan = make(chan *sarama.ProducerMessage, chansize)
+	msgChan = make(chan *sarama.ProducerMessage, chansize)
 	go SendMsg()
 	return
 }
@@ -29,7 +29,7 @@ func Init(address []string, chansize int64) (err error) {
 func SendMsg() {
 	for {
 		select {
-		case msg := <-MsgChan:
+		case msg := <-msgChan:
 			pid, offset, err := client.SendMessage(msg)
 			if err != nil {
 				logrus.Warning("send message failed,", err)
@@ -39,4 +39,9 @@ func SendMsg() {
 		}
 	}
 
+}
+
+func ToMsgChan(msg *sarama.ProducerMessage) {
+	msgChan <- msg
+	return
 }

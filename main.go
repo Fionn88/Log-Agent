@@ -36,12 +36,15 @@ func run(configObj *Config) (err error) {
 			time.Sleep(time.Second)
 			continue
 		}
+		if len(line.Text) == 0 {
+			continue
+		}
 		fmt.Println(line.Text)
 		msg := &sarama.ProducerMessage{}
 		msg.Topic = configObj.Topic
 		msg.Value = sarama.StringEncoder(line.Text)
 
-		kafka.MsgChan <- msg
+		kafka.ToMsgChan(msg)
 	}
 
 }
