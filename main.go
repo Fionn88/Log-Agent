@@ -5,6 +5,7 @@ import (
 	"kafka"
 	"tailfile"
 	"time"
+	"workspace/etcd"
 
 	"github.com/Shopify/sarama"
 	"github.com/go-ini/ini"
@@ -14,6 +15,12 @@ import (
 type Config struct {
 	KafkaConfig   `ini:"kafka"`
 	CollectConfig `ini:"collect"`
+	EtcdConfig    `ini:"etcd"`
+}
+
+type EtcdConfig struct {
+	Address    string `ini:"address"`
+	CollectKey string `ini:"collect_key"`
 }
 
 type KafkaConfig struct {
@@ -55,7 +62,7 @@ func main() {
 	var configObj = new(Config)
 	err := ini.MapTo(configObj, "config.ini")
 	if err != nil {
-		logrus.Error("load config.ini failed,err: ", err)
+		logrus.Errorf("load config.ini failed,err:%v", err)
 		return
 	}
 	// cfg, err := ini.Load("config.ini")
@@ -69,21 +76,36 @@ func main() {
 	// Init Kafka
 	err = kafka.Init([]string{configObj.KafkaConfig.Address}, configObj.KafkaConfig.ChanSize)
 	if err != nil {
-		logrus.Error("init kafka failed,err: ", err)
+		logrus.Errorf("init kafka failed,err:%v", err)
 		return
 	}
 	logrus.Info("init kafka success")
 
+	// Init Etcd
+	err = etcd.Init([]string{configObj.EtcdConfig.Address})
+	if err != nil {
+		logrus.Errorf("init etcd failed,err:%v", err)
+		return
+	}
+
+	allConf, err := etcd.GetConf(configObj.EtcdConfig.CollectKey)
+	if err != nil {
+		logrus.Errorf("get config from etcd failed,err:%v", err)
+		return
+	}
+	fmt.Println(allConf)
+
 	// Init TailFil
 	err = tailfile.Init(configObj.CollectConfig.LogFilePath)
 	if err != nil {
-		logrus.Error("init tailfile failed,err: ", err)
+		logrus.Errorf("init tailfile failed,err:%v", err)
+		return
 	}
 	logrus.Info("init tailfile success")
 
 	err = run(configObj)
 	if err != nil {
-		logrus.Error("run failed,err: ", err)
+		logrus.Errorf("run failed,err:%v", err)
 		return
 	}
 
