@@ -28,7 +28,7 @@ func Init(address []string) (err error) {
 
 }
 
-func GetConf(key string) ([]common.CollectEntry, error) {
+func GetConf(key string) (conf []common.CollectEntry, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 	defer cancel()
 	resp, err := client.Get(ctx, key)
@@ -43,11 +43,10 @@ func GetConf(key string) ([]common.CollectEntry, error) {
 	ret := resp.Kvs[0]
 	// ret.Value
 	fmt.Println(string(ret.Value))
-	var collectEntries []common.CollectEntry
-	err = json.Unmarshal(ret.Value, &collectEntries)
+	err = json.Unmarshal(ret.Value, &conf)
 	if err != nil {
 		logrus.Errorf("json unmarshal failed, err:%v", err)
 		return nil, err
 	}
-	return collectEntries, nil
+	return conf, nil
 }
