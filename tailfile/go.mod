@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/hpcloud/tail v1.0.0
 	github.com/sirupsen/logrus v1.9.3
+	github.com/Shopify/sarama v1.19.0
 )
 
 require (

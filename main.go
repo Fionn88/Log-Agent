@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"kafka"
 	"tailfile"
-	"time"
 	"workspace/etcd"
 
-	"github.com/Shopify/sarama"
 	"github.com/go-ini/ini"
 	"github.com/sirupsen/logrus"
 )
@@ -33,25 +31,11 @@ type CollectConfig struct {
 	LogFilePath string `ini:"logfile_path"`
 }
 
-func run(configObj *Config) (err error) {
+func run() {
 	// logfile => TailObj => log => client => kafka
 
 	for {
-		line, ok := <-tailfile.TailObj.Lines
-		if !ok {
-			logrus.Warn("tail file reclose reopen, filename:%s\n", tailfile.TailObj.Filename)
-			time.Sleep(time.Second)
-			continue
-		}
-		if len(line.Text) == 0 {
-			continue
-		}
-		fmt.Println(line.Text)
-		msg := &sarama.ProducerMessage{}
-		msg.Topic = configObj.Topic
-		msg.Value = sarama.StringEncoder(line.Text)
 
-		kafka.ToMsgChan(msg)
 	}
 
 }
@@ -96,17 +80,13 @@ func main() {
 	fmt.Println(allConf)
 
 	// Init TailFil
-	err = tailfile.Init(configObj.CollectConfig.LogFilePath)
+	err = tailfile.Init(allConf)
 	if err != nil {
 		logrus.Errorf("init tailfile failed,err:%v", err)
 		return
 	}
 	logrus.Info("init tailfile success")
 
-	err = run(configObj)
-	if err != nil {
-		logrus.Errorf("run failed,err:%v", err)
-		return
-	}
+	run()
 
 }

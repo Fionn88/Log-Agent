@@ -5,15 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+	"workspace/common"
 
 	"github.com/sirupsen/logrus"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
-
-type collectEntry struct {
-	Path  string `json:"path"`
-	Topic string `json:"topic"`
-}
 
 var (
 	client *clientv3.Client
@@ -32,7 +28,7 @@ func Init(address []string) (err error) {
 
 }
 
-func GetConf(key string) ([]collectEntry, error) {
+func GetConf(key string) ([]common.CollectEntry, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 	defer cancel()
 	resp, err := client.Get(ctx, key)
@@ -47,7 +43,7 @@ func GetConf(key string) ([]collectEntry, error) {
 	ret := resp.Kvs[0]
 	// ret.Value
 	fmt.Println(string(ret.Value))
-	var collectEntries []collectEntry
+	var collectEntries []common.CollectEntry
 	err = json.Unmarshal(ret.Value, &collectEntries)
 	if err != nil {
 		logrus.Errorf("json unmarshal failed, err:%v", err)
