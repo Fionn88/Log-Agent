@@ -17,6 +17,10 @@ type tailTask struct {
 	tObj  *tail.Tail
 }
 
+var (
+	confChan chan []common.CollectEntry
+)
+
 func newTailTask(path, topic string) *tailTask {
 
 	tt := &tailTask{
@@ -76,5 +80,14 @@ func Init(allConf []common.CollectEntry) (err error) {
 		go tt.run()
 	}
 
+	confChan = make(chan []common.CollectEntry)
+	newConf := <-confChan
+	logrus.Infof("Get new conf from etcd,conf: %v", newConf)
+
 	return
+}
+
+func SendnewConf(newConf []common.CollectEntry) {
+	confChan <- newConf
+
 }

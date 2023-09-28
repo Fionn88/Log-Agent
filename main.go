@@ -79,6 +79,8 @@ func main() {
 	}
 	fmt.Println(allConf)
 
+	go etcd.WatchConf(configObj.EtcdConfig.CollectKey)
+
 	// Init TailFil
 	err = tailfile.Init(allConf)
 	if err != nil {

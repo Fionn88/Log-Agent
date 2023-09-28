@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"tailfile"
 	"time"
 	"workspace/common"
 
@@ -49,4 +50,22 @@ func GetConf(key string) (conf []common.CollectEntry, err error) {
 		return nil, err
 	}
 	return conf, nil
+}
+
+func WatchConf(key string) {
+	watch := client.Watch(context.Background(), key)
+	var newConf []common.CollectEntry
+	for wresp := range watch {
+		logrus.Infof("watch key:%s", key)
+		for _, evt := range wresp.Events {
+			fmt.Printf("Type: %s Key:%s Value:%s\n", evt.Type, evt.Kv.Key, evt.Kv.Value)
+			err := json.Unmarshal(evt.Kv.Value, &newConf)
+			if err != nil {
+				logrus.Errorf("json unmarshal new conf failed, err:%v", err)
+				continue
+			}
+			tailfile.SendnewConf(newConf)
+		}
+	}
+
 }
