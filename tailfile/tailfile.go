@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"kafka"
 	"time"
-	"workspace/common"
 
 	"github.com/Shopify/sarama"
 	"github.com/hpcloud/tail"
@@ -16,10 +15,6 @@ type tailTask struct {
 	topic string
 	tObj  *tail.Tail
 }
-
-var (
-	confChan chan []common.CollectEntry
-)
 
 func newTailTask(path, topic string) *tailTask {
 
@@ -63,31 +58,5 @@ func (t *tailTask) run() {
 
 		kafka.ToMsgChan(msg)
 	}
-
-}
-
-func Init(allConf []common.CollectEntry) (err error) {
-
-	for _, conf := range allConf {
-
-		tt := newTailTask(conf.Path, conf.Topic)
-		err = tt.Init()
-		if err != nil {
-			logrus.Errorf("create tailObj for path: %s failed, err:%v\n", conf.Path, err)
-			continue
-		}
-		logrus.Infof("create a tail task for path: %s success\n", conf.Path)
-		go tt.run()
-	}
-
-	confChan = make(chan []common.CollectEntry)
-	newConf := <-confChan
-	logrus.Infof("Get new conf from etcd,conf: %v", newConf)
-
-	return
-}
-
-func SendnewConf(newConf []common.CollectEntry) {
-	confChan <- newConf
 
 }
