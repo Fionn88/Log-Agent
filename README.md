@@ -1,5 +1,8 @@
 # Log-Agent
 
+- The Architecture:
+![image](https://github.com/Fionn88/Log-Agent/blob/main/readme_assests/architecture.png)
+
 ## 正在處理的 issue 
 
 ## 已解決的 issue
